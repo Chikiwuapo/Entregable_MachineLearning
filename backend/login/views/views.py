@@ -212,7 +212,20 @@ def api_login(request):
             
             # Determinar redirección basada en el dominio del email
             redirect_url = get_redirect_url_by_domain(user.email)
-            response_data = {'ok': True, 'redirect': redirect_url}
+            
+            # --- SE REEMPLAZÓ ESTA SECCIÓN ---
+            response_data = {
+                'ok': True,
+                'redirect': redirect_url,
+                'user': {
+                    'id': user.id,
+                    'name': f'{user.nombres} {user.apellidos}',
+                    'email': user.email,
+                    'nombres': user.nombres,
+                    'apellidos': user.apellidos,
+                }
+            }
+            # ----------------------------------
             
             # Agregar información adicional para administradores
             if is_admin_user(user.email):
@@ -241,7 +254,7 @@ def api_login(request):
 @csrf_exempt
 def api_register_basic(request):
     """Crea o actualiza un usuario solo con datos básicos (sin rostro).
-    Espera JSON o x-www-form-urlencoded con campos: nombres, apellidos, email, dni.
+    Esperan JSON o x-www-form-urlencoded con campos: nombres, apellidos, email, dni.
     """
     try:
         try:
@@ -404,7 +417,20 @@ def api_validate_user(request):
             
             # Determinar redirección basada en el dominio del email
             redirect_url = get_redirect_url_by_domain(user.email)
-            response_data = {'ok': True, 'redirect': redirect_url}
+            
+            # --- SE REEMPLAZÓ ESTA SECCIÓN ---
+            response_data = {
+                'ok': True,
+                'redirect': redirect_url,
+                'user': {
+                    'id': user.id,
+                    'name': f'{user.nombres} {user.apellidos}',
+                    'email': user.email,
+                    'nombres': user.nombres,
+                    'apellidos': user.apellidos,
+                }
+            }
+            # ----------------------------------
             
             # Agregar información adicional para administradores
             if is_admin_user(user.email):

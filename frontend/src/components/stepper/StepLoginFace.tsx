@@ -3,6 +3,8 @@ import Modal from './Modal'
 import { useFaceCapture } from '../../auth/useFaceCapture'
 import { loginFacial } from '../../services/authService'
 import { useNavigate } from 'react-router-dom'
+// --- SE IMPORTÓ EL STORE ---
+import { useUserStore } from '../../auth/userStore'
 
 export default function StepLoginFace({ email }: { email?: string }) {
   const { videoRef, canvasRef, overlayRef, ready, error, faceReady, status, capture } = useFaceCapture()
@@ -10,6 +12,9 @@ export default function StepLoginFace({ email }: { email?: string }) {
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const navigate = useNavigate()
+  
+  // --- SE EXTRAJO LA FUNCIÓN DEL STORE ---
+  const { updateProfile } = useUserStore()
 
   async function onValidate() {
     const shot = capture()
@@ -17,7 +22,17 @@ export default function StepLoginFace({ email }: { email?: string }) {
     setSubmitting(true)
     try {
       const response = await loginFacial({ email, facialFrame: shot.imageB64, position: shot.position })
+      
+      // --- SE ACTUALIZA EL PERFIL SI EL USUARIO EXISTE EN LA RESPUESTA ---
+      if (response.user) {
+        updateProfile({
+          name: response.user.name,
+          email: response.user.email
+        })
+      }
+
       setResult({ ok: true, message: 'Rostro validado con éxito' })
+      
       // Usar la URL de redirección del backend o fallback a blackboard
       const redirectUrl = response.redirect || '/blackboard'
       setTimeout(() => navigate(redirectUrl), 700)
@@ -88,7 +103,7 @@ export default function StepLoginFace({ email }: { email?: string }) {
         <div className="mt-3 flex justify-end gap-2">
           {result?.ok ? (
             <button onClick={()=> {
-              const redirectUrl = '/blackboard' // Por defecto, pero debería usar la URL del backend
+              const redirectUrl = '/blackboard' 
               navigate(redirectUrl)
             }} className="px-3 py-1.5 rounded-md bg-[#5227FF] text-white">Ir al blackboard</button>
           ) : (

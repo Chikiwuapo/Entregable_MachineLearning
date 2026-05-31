@@ -102,16 +102,23 @@ export default function TrainModelVocales() {
     }
   }, [])
 
-  return (
+return (
     <Layout>
-      <div className="container-page py-6">
-        <div className="mb-4">
-          <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-header'}`}>Entrenar modelo - Vocales</h1>
-          <p className={`${isDarkMode ? 'text-gray-300' : 'text-slate-600'} mt-1`}>Configura parámetros y visualiza la curva de precisión en tiempo real.</p>
+      {/* 1. Viewport Locking: Contenedor principal con alto fijo y sin desborde global */}
+      <div className="w-full h-[calc(100vh-70px)] overflow-hidden p-6 flex flex-col">
+        
+        {/* 2. Protection of static elements: Cabecera con shrink-0 */}
+        <div className="shrink-0 mb-4">
+          <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-header'}`}>
+            Entrenar modelo - Vocales
+          </h1>
+          <p className={`${isDarkMode ? 'text-gray-300' : 'text-slate-600'} mt-1 text-sm`}>
+            Configura parámetros y visualiza la curva de precisión en tiempo real.
+          </p>
         </div>
 
-        {/* Tarjeta del modelo seleccionado (solo Vocales) */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
+        {/* 2. Protection of static elements: Tarjeta de modelo con shrink-0 */}
+        <div className="shrink-0 grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
           <div className={`rounded-2xl p-4 border-2 ${isDarkMode ? 'bg-gray-900 border-indigo-500/60' : 'bg-white border-indigo-500/60'} shadow-soft` }>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -126,8 +133,11 @@ export default function TrainModelVocales() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-          <div className={`rounded-2xl p-4 shadow ${isDarkMode ? 'bg-gray-900 border border-gray-800' : 'bg-white border border-slate-200'}`}>
+        {/* Contenedor de las columnas: Ocupa el espacio restante de forma flexible */}
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0 items-start">
+          
+          {/* 3. Independencia de la columna de parámetros: shrink-0 e items-start */}
+          <div className={`shrink-0 lg:col-span-1 rounded-2xl p-4 shadow ${isDarkMode ? 'bg-gray-900 border border-gray-800' : 'bg-white border border-slate-200'}`}>
             <div className="text-sm font-semibold">Parámetros</div>
             <div className="mt-3 space-y-3 text-sm">
               <div>
@@ -198,10 +208,12 @@ export default function TrainModelVocales() {
             )}
           </div>
 
-          <div className="lg:col-span-2 flex flex-col gap-6">
+          {/* 4 y 5. Columnas de Gráficos con Scroll Autónomo y Ocultación de Barra */}
+          <div className="lg:col-span-2 h-full max-h-full overflow-y-auto flex flex-col gap-6 pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <DataDistributionCard data={distData} isDarkMode={isDarkMode} />
             <RegressionChart data={regData} isDarkMode={isDarkMode} isTraining={isTraining} />
           </div>
+
         </div>
       </div>
 
@@ -209,7 +221,7 @@ export default function TrainModelVocales() {
         <ConfirmModal title="Entrenamiento completado" message="El entrenamiento ha finalizado. Revisa los resultados en el gráfico de regresión." onClose={()=>setShowConfirm(false)} isDarkMode={isDarkMode} />
       )}
     </Layout>
-  )
+  );
 }
 
 function RegressionChart({ data, isDarkMode, isTraining }: { data: { x: number; y: number }[]; isDarkMode: boolean; isTraining: boolean }) {

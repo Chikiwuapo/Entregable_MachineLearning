@@ -416,17 +416,23 @@ export default function TrainModel() {
     )
   }
 
-  return (
+return (
     <Layout>
-      <div className={`min-h-[85vh] p-6 transition-colors ${isDarkMode ? 'bg-gradient-to-br from-[#0A0A0A] to-[#121212]' : 'bg-gradient-to-br from-gray-50 to-gray-100'}`}>
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-4">
-          <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-header'}`}>Entrenar modelo - Operaciones Aritméticas</h1>
-          <p className={`${isDarkMode ? 'text-gray-300' : 'text-slate-600'} mt-1`}>Configura parámetros y visualiza la curva de precisión en tiempo real.</p>
+      {/* 1. Viewport Locking: Eliminamos min-h-[85vh] y forzamos altura exacta fija con eliminación de scroll global */}
+      <div className={`w-full h-[calc(100vh-70px)] overflow-hidden p-6 flex flex-col transition-colors ${isDarkMode ? 'bg-gradient-to-br from-[#0A0A0A] to-[#121212]' : 'bg-gradient-to-br from-gray-50 to-gray-100'}`}>
+        
+        {/* 2. Protection of static elements: Título superior protegido con shrink-0 */}
+        <div className="shrink-0 mb-4">
+          <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-header'}`}>
+            Entrenar modelo - Operaciones Aritméticas
+          </h1>
+          <p className={`${isDarkMode ? 'text-gray-300' : 'text-slate-600'} mt-1 text-sm`}>
+            Configura parámetros y visualiza la curva de precisión en tiempo real.
+          </p>
         </div>
 
-        {/* Tarjeta del modelo seleccionado (solo Operaciones Aritméticas) */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
+        {/* 2. Protection of static elements: Tarjeta del modelo aritmético protegida con shrink-0 */}
+        <div className="shrink-0 grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
           <div className={`rounded-2xl p-4 border-2 ${isDarkMode ? 'bg-gray-900 border-orange-500/60' : 'bg-white border-orange-500/60'} shadow-soft`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -441,54 +447,55 @@ export default function TrainModel() {
           </div>
         </div>
 
-          {/* Panel de control a la izquierda y gráficos a la derecha */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-            {/* Config lateral */}
-            <div className={`rounded-2xl p-4 shadow ${isDarkMode ? 'bg-gray-900 border border-gray-800' : 'bg-white border border-slate-200'}`}>
-              <div className={`text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-header'}`}>Configuración</div>
-              <div className="mt-3 space-y-3 text-sm">
-                <div>
-                  <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-slate-500'}`}>Épocas</label>
-                  <input type="number" min={1} max={200} value={epochs} onChange={(e)=>setEpochs(parseInt(e.target.value||'1'))} className={`w-full px-3 py-2 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-100' : 'bg-white border-slate-300 text-slate-800'}`} />
-                </div>
-                <div>
-                  <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-slate-500'}`}>Batch size</label>
-                  <input type="number" min={1} max={128} value={batch} onChange={(e)=>setBatch(parseInt(e.target.value||'1'))} className={`w-full px-3 py-2 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-100' : 'bg-white border-slate-300 text-slate-800'}`} />
-                </div>
-                <div>
-                  <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-slate-500'}`}>Learning rate</label>
-                  <input type="number" step={0.0001} min={0.0001} max={0.1} value={learningRate} onChange={(e)=>setLearningRate(parseFloat(e.target.value||'0.001'))} className={`w-full px-3 py-2 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-100' : 'bg-white border-slate-300 text-slate-800'}`} />
-                </div>
-                <button onClick={onTrain} className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow">Entrenar</button>
-                
-                {/* Resultados del entrenamiento - Solo mostrar cuando hay datos */}
-                {regData.length > 0 && (
-                  <div className={`mt-4 rounded-lg p-3 ${isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-slate-50 border border-slate-200'}`}>
-                    <div className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-slate-500'} mb-2`}>Resultados</div>
-                    <div className="space-y-2 text-xs">
-                      {isTraining && (
-                        <div className={`${isDarkMode ? 'text-gray-200' : 'text-slate-700'}`}>
-                          Época actual: <span className="font-semibold text-blue-600">{currentEpoch}/{epochs}</span>
-                        </div>
-                      )}
+        {/* Contenedor flexible de las columnas (min-h-0 es clave para habilitar los scrolls internos en grids) */}
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0 items-start">
+          
+          {/* 3. Independencia de la columna de parámetros: shrink-0 items-start para congelar el formulario */}
+          <div className={`shrink-0 lg:col-span-1 rounded-2xl p-4 shadow ${isDarkMode ? 'bg-gray-900 border border-gray-800' : 'bg-white border border-slate-200'}`}>
+            <div className={`text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-header'}`}>Configuración</div>
+            <div className="mt-3 space-y-3 text-sm">
+              <div>
+                <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-slate-500'}`}>Épocas</label>
+                <input type="number" min={1} max={200} value={epochs} onChange={(e)=>setEpochs(parseInt(e.target.value||'1'))} className={`w-full px-3 py-2 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-100' : 'bg-white border-slate-300 text-slate-800'}`} />
+              </div>
+              <div>
+                <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-slate-500'}`}>Batch size</label>
+                <input type="number" min={1} max={128} value={batch} onChange={(e)=>setBatch(parseInt(e.target.value||'1'))} className={`w-full px-3 py-2 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-100' : 'bg-white border-slate-300 text-slate-800'}`} />
+              </div>
+              <div>
+                <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-slate-500'}`}>Learning rate</label>
+                <input type="number" step={0.0001} min={0.0001} max={0.1} value={learningRate} onChange={(e)=>setLearningRate(parseFloat(e.target.value||'0.001'))} className={`w-full px-3 py-2 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-100' : 'bg-white border-slate-300 text-slate-800'}`} />
+              </div>
+              <button onClick={onTrain} className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow transition-all duration-200">Entrenar</button>
+              
+              {/* Resultados del entrenamiento */}
+              {regData.length > 0 && (
+                <div className={`mt-4 rounded-lg p-3 ${isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-slate-50 border border-slate-200'}`}>
+                  <div className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-slate-500'} mb-2`}>Resultados</div>
+                  <div className="space-y-2 text-xs">
+                    {isTraining && (
                       <div className={`${isDarkMode ? 'text-gray-200' : 'text-slate-700'}`}>
-                        Última precisión: <span className="font-semibold text-emerald-600">{(regData[regData.length-1].y * 100).toFixed(1)}%</span>
+                        Época actual: <span className="font-semibold text-blue-600">{currentEpoch}/{epochs}</span>
                       </div>
-                      <div className={`${isDarkMode ? 'text-gray-200' : 'text-slate-700'}`}>
-                        Mejor precisión: <span className="font-semibold text-emerald-600">{(Math.max(...regData.map(p=>p.y)) * 100).toFixed(1)}%</span>
-                      </div>
+                    )}
+                    <div className={`${isDarkMode ? 'text-gray-200' : 'text-slate-700'}`}>
+                      Última precisión: <span className="font-semibold text-emerald-600">{(regData[regData.length-1].y * 100).toFixed(1)}%</span>
+                    </div>
+                    <div className={`${isDarkMode ? 'text-gray-200' : 'text-slate-700'}`}>
+                      Mejor precisión: <span className="font-semibold text-emerald-600">{(Math.max(...regData.map(p=>p.y)) * 100).toFixed(1)}%</span>
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
-
-            {/* Gráficos a la derecha */}
-              <div className="lg:col-span-2 flex flex-col gap-6">
-                <BarChart data={distData} />
-                <RegressionChart data={regData} />
-              </div>
           </div>
+
+          {/* 4 y 5. Activación de Scroll Autónomo para Gráficos y Ocultación Absoluta de la Barra */}
+          <div className="lg:col-span-2 h-full max-h-full overflow-y-auto flex flex-col gap-6 pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <BarChart data={distData} />
+            <RegressionChart data={regData} />
+          </div>
+
         </div>
       </div>
 
