@@ -80,16 +80,6 @@ export const API_ENDPOINTS = {
     deleteProfile: '/voz/api/voice_profile/',
     checkUsers: '/voz/api/check_registered_users/',
   },
-  
-  // Chatbot
-  chatbot: {
-    base: '/chatbot',
-    chat: '/chatbot/api/chat/',
-    health: '/chatbot/api/health/',
-    history: '/chatbot/api/history/',
-    clearSession: '/chatbot/api/clear-session/',
-    analytics: '/chatbot/api/analytics/',
-  },
 };
 
 // Helper function to build full API URLs

@@ -8,125 +8,69 @@ export default defineConfig(({ command, mode }) => {
 
   return {
     plugins: [react()],
-    
-    // Build configuration for production
+
     build: {
       outDir: 'dist',
       sourcemap: false,
+      // Terser con compresión agresiva
       minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: true,      // elimina console.log en producción
+          drop_debugger: true,
+          pure_funcs: ['console.info', 'console.debug', 'console.warn'],
+        },
+      },
+      // Aviso a 1 MB (Spline es grande, lo sabemos)
+      chunkSizeWarningLimit: 1000,
       rollupOptions: {
         output: {
-          manualChunks: {
-            vendor: ['react', 'react-dom'],
-            // Removed MediaPipe from manual chunks to avoid build issues
+          // Chunks manuales: cada librería pesada va a su propio archivo
+          // El navegador puede cachear cada uno de forma independiente
+          manualChunks(id) {
+            // Spline 3D — chunk propio porque pesa ~2 MB
+            if (id.includes('@splinetool')) return 'spline'
+            // Recharts + D3 — solo se usan en dashboard admin
+            if (id.includes('recharts') || id.includes('d3-') || id.includes('victory')) return 'charts'
+            // Framer Motion
+            if (id.includes('framer-motion') || id.includes('motion')) return 'motion'
+            // GSAP
+            if (id.includes('gsap')) return 'gsap'
+            // React core
+            if (id.includes('react-dom') || id.includes('react/')) return 'react'
+            // React Router
+            if (id.includes('react-router')) return 'router'
+            // Lucide icons
+            if (id.includes('lucide-react')) return 'icons'
           },
         },
       },
     },
 
-    // Development server configuration
+    // Dev server con proxy al backend local
     server: {
       host: true,
       port: 5173,
-      // Only use proxy in development
       proxy: isDev ? {
-        '/api': {
-          target: 'http://127.0.0.1:8000',
-          changeOrigin: true,
-          secure: false,
-        },
-        '/operaciones': {
-          target: 'http://127.0.0.1:8000',
-          changeOrigin: true,
-          secure: false,
-        },
-        // Importante: NO proxyear todas las rutas de /vocales para evitar capturar rutas de la SPA.
-        // Solo proxyear los endpoints de backend que usamos desde Vocales.
-        '/vocales/api': {
-          target: 'http://127.0.0.1:8000',
-          changeOrigin: true,
-          secure: false,
-        },
-        '/vocales/gestos_entrenados': {
-          target: 'http://127.0.0.1:8000',
-          changeOrigin: true,
-          secure: false,
-        },
-        '/vocales/eliminar-gesto': {
-          target: 'http://127.0.0.1:8000',
-          changeOrigin: true,
-          secure: false,
-        },
-        // No proxyear todo /abecedario; solo endpoints de backend necesarios
-        '/abecedario/api': {
-          target: 'http://127.0.0.1:8000',
-          changeOrigin: true,
-          secure: false,
-        },
-        '/abecedario/gestos_entrenados': {
-          target: 'http://127.0.0.1:8000',
-          changeOrigin: true,
-          secure: false,
-        },
-        '/abecedario/eliminar-gesto': {
-          target: 'http://127.0.0.1:8000',
-          changeOrigin: true,
-          secure: false,
-        },
-        // No proxyear todo /palabras; solo endpoints de backend necesarios
-        '/palabras/api': {
-          target: 'http://127.0.0.1:8000',
-          changeOrigin: true,
-          secure: false,
-        },
-        '/palabras/gestos_entrenados': {
-          target: 'http://127.0.0.1:8000',
-          changeOrigin: true,
-          secure: false,
-        },
-        '/palabras/eliminar-gesto': {
-          target: 'http://127.0.0.1:8000',
-          changeOrigin: true,
-          secure: false,
-        },
-        // Endpoints de guardado de Palabras
-        '/palabras/guardar-gesto': {
-          target: 'http://127.0.0.1:8000',
-          changeOrigin: true,
-          secure: false,
-        },
-        '/palabras/guardar_gesto': {
-          target: 'http://127.0.0.1:8000',
-          changeOrigin: true,
-          secure: false,
-        },
-        // Django views (HTML) used by the registration flow for CSRF and POST form
-        '/register': {
-          target: 'http://127.0.0.1:8000',
-          changeOrigin: true,
-          secure: false,
-        },
-        '/login': {
-          target: 'http://127.0.0.1:8000',
-          changeOrigin: true,
-          secure: false,
-        },
-        // Voice endpoints
-        '/voz': {
-          target: 'http://127.0.0.1:8000',
-          changeOrigin: true,
-          secure: false,
-        },
-        // Chatbot endpoints
-        '/chatbot': {
-          target: 'http://127.0.0.1:8000',
-          changeOrigin: true,
-          secure: false,
-        },
+        '/api': { target: 'http://127.0.0.1:8000', changeOrigin: true },
+        '/operaciones': { target: 'http://127.0.0.1:8000', changeOrigin: true },
+        '/vocales/api': { target: 'http://127.0.0.1:8000', changeOrigin: true },
+        '/vocales/gestos_entrenados': { target: 'http://127.0.0.1:8000', changeOrigin: true },
+        '/vocales/eliminar-gesto': { target: 'http://127.0.0.1:8000', changeOrigin: true },
+        '/abecedario/api': { target: 'http://127.0.0.1:8000', changeOrigin: true },
+        '/abecedario/gestos_entrenados': { target: 'http://127.0.0.1:8000', changeOrigin: true },
+        '/abecedario/eliminar-gesto': { target: 'http://127.0.0.1:8000', changeOrigin: true },
+        '/palabras/api': { target: 'http://127.0.0.1:8000', changeOrigin: true },
+        '/palabras/gestos_entrenados': { target: 'http://127.0.0.1:8000', changeOrigin: true },
+        '/palabras/eliminar-gesto': { target: 'http://127.0.0.1:8000', changeOrigin: true },
+        '/palabras/guardar-gesto': { target: 'http://127.0.0.1:8000', changeOrigin: true },
+        '/palabras/guardar_gesto': { target: 'http://127.0.0.1:8000', changeOrigin: true },
+        '/register': { target: 'http://127.0.0.1:8000', changeOrigin: true },
+        '/login': { target: 'http://127.0.0.1:8000', changeOrigin: true },
+        '/voz': { target: 'http://127.0.0.1:8000', changeOrigin: true },
       } : undefined,
     },
 
-    // Define global constants
     define: {
       __DEV__: isDev,
       __PROD__: isProd,

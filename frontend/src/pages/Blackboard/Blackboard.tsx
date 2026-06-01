@@ -227,21 +227,6 @@ return (
                   />
                 </motion.div>
 
-                 {/* Chatbot Automatizado */}
-                <motion.div variants={card}>
-                  <CourseCard
-                    title="Chatbot Automatizado con IA"
-                    subtitle="Por AresDigitalAcademy • Actualizado 2025"
-                    imageUrl="https://website-assets-fd.freshworks.com/attachments/cjr7cheqv01aq92g00a0z7onq-ai-chatbot-04-2x.one-half.png"
-                    cornerCode="CB"
-                    to="/courses/chatbot-automation"
-                    accent="teal"
-                    onComplete={() => completeCourseByTitle("Chatbot Automatizado con IA")}
-                    completed={watchedCourses.some(c => c.title.includes("Chatbot") && c.completed)}
-                    isDarkMode={isDarkMode}
-                  />
-                </motion.div>
-
                 {/* Detección de Emociones en Voz – PRÓXIMAMENTE */}
                 <motion.div variants={card} className={`course-card udemy rounded-lg overflow-hidden group cursor-not-allowed opacity-95 h-full border ${isDarkMode ? 'bg-[#121824] border-gray-700' : 'bg-white'}`}>
                   <div className="relative h-40 bg-gradient-to-br from-fuchsia-500 to-rose-600 overflow-hidden">
