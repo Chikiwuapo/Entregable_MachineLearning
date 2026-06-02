@@ -12,7 +12,12 @@ Thumbs.db
 
 # Env files (keep examples tracked)
 .env
-.env.*
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production.local
 !.env.example
 
 #Base de datos
