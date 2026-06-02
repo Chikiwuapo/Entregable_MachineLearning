@@ -1,9 +1,9 @@
 import Layout from '../../../components/Blackboard/Layout'
 import { useTheme } from '../../../App'
-// Igualamos dimensiones y estilo usando el mismo CameraPanel que Vocales/Arithmetic
 import CameraPanel from '../../../components/Blackboard/Arithmetic/CameraPanel'
 import { useAbecedario } from './hooks/useAbecedario'
 import { useEffect, useMemo, useState } from 'react'
+import { http } from '../../../config/httpClient'
 
 export default function CaptureSamplesAbecedario() {
   const { isDarkMode } = useTheme()
@@ -47,7 +47,7 @@ export default function CaptureSamplesAbecedario() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('/abecedario/gestos_entrenados/')
+        const res = await http('/abecedario/gestos_entrenados/')
         if (res.ok) {
           const data = await res.json()
           const count = Array.isArray(data?.gestos) ? data.gestos.length : (Array.isArray(data) ? data.length : 0)

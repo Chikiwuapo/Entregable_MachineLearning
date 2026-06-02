@@ -1,21 +1,9 @@
 // Service layer for Arithmetic page
+import { http, toJsonSafe } from '../../../../config/httpClient'
 
-export const apiFetch = async (path: string, init?: RequestInit) => {
+export const apiFetch = (path: string, init?: RequestInit) => {
   const p = path.startsWith('/') ? path.slice(1) : path
-  const primary = `/api/operaciones/${p}`
-  const resPrimary = await fetch(primary, init)
-  // Always rely on Vite proxy for local dev to avoid CORS.
-  // If the backend returns non-2xx, let the caller handle the JSON/error.
-  return resPrimary
-}
-
-// Generic JSON parser with safe fallback
-const toJsonSafe = async (res: Response) => {
-  try {
-    return await res.json()
-  } catch {
-    return { success: false, error: 'Respuesta inválida del servidor' }
-  }
+  return http(`/api/operaciones/${p}`, init)
 }
 
 export async function saveGestureAPI(payload: any) {
@@ -50,7 +38,6 @@ export async function calculateAPI(payload: any) {
   return toJsonSafe(res)
 }
 
-// Reconocimiento con ambas manos
 export async function recognizeTwoHandsAPI(payload: { left?: any; right?: any }) {
   const res = await apiFetch('reconocer-dos-manos/', {
     method: 'POST',
@@ -60,7 +47,6 @@ export async function recognizeTwoHandsAPI(payload: { left?: any; right?: any })
   return toJsonSafe(res)
 }
 
-// Eliminar gesto específico (intenta rutas con y sin prefijo /api)
 export async function deleteGestureAPI(gestoId: number) {
   const candidates = [
     `/api/operaciones/eliminar-gesto/${gestoId}/`,
@@ -68,10 +54,10 @@ export async function deleteGestureAPI(gestoId: number) {
   ]
   for (const url of candidates) {
     try {
-      const res = await fetch(url, { method: 'DELETE' })
+      const res = await http(url, { method: 'DELETE' })
       if (res.ok) return toJsonSafe(res)
     } catch {
-      // try next candidate
+      // try next
     }
   }
   return { success: false, error: 'No se pudo eliminar el gesto' }

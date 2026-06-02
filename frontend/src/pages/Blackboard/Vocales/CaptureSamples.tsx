@@ -4,6 +4,7 @@ import { useTheme } from '../../../App'
 // Usamos el mismo panel de cámara de Arithmetic para igualar dimensiones/estilo
 import CameraPanel from '../../../components/Blackboard/Arithmetic/CameraPanel'
 import { useVocales } from './hooks/useVocales'
+import { http } from '../../../config/httpClient'
 
 export default function CaptureSamplesVocales() {
   const { isDarkMode } = useTheme()
@@ -46,7 +47,7 @@ export default function CaptureSamplesVocales() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('/vocales/gestos_entrenados/')
+        const res = await http('/vocales/gestos_entrenados/')
         if (!res.ok) throw new Error('No se pudo obtener registros')
         const data = await res.json()
         const count = Array.isArray(data?.gestos) ? data.gestos.length : (Array.isArray(data) ? data.length : 0)

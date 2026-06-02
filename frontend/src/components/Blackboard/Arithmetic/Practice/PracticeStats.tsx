@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { http } from '../../../../config/httpClient'
 
 interface Props {
   isDarkMode?: boolean
@@ -14,7 +15,7 @@ export default function PracticeStats({ isDarkMode = false, model }: Props) {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('/operaciones/gestos_entrenados')
+        const res = await http('/operaciones/gestos_entrenados')
         if (!res.ok) throw new Error('err')
         const data = await res.json()
         const gestos: any[] = Array.isArray(data?.gestos) ? data.gestos : (Array.isArray(data) ? data : [])

@@ -1,5 +1,5 @@
 // Auth service to communicate with Django backend
-// Uses Vite dev proxy configured for /api and we extend fetch to hit /register/ via proxy as well
+import { http } from '../config/httpClient'
 
 export type PositionData = {
   x?: number
@@ -11,7 +11,6 @@ export type PositionData = {
   dist?: number
 }
 
-// Tipo de respuesta común para los endpoints de autenticación exitosa
 export type AuthResponse = {
   ok: true
   redirect?: string
@@ -25,11 +24,10 @@ export type AuthResponse = {
 }
 
 export async function registerBasic(payload: { nombres: string; apellidos: string; email: string; dni: string }) {
-  const res = await fetch('/api/register-basic/', {
+  const res = await http('/api/register-basic/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
-    credentials: 'include',
   })
   const data = await res.json().catch(() => ({}))
   if (!res.ok || !data?.ok) {
@@ -38,13 +36,11 @@ export async function registerBasic(payload: { nombres: string; apellidos: strin
   return data as { ok: true; created?: boolean }
 }
 
-// Validate traditional credentials (email + DNI)
 export async function validateUserTraditional(params: { email: string; dni: string }) {
-  const res = await fetch('/api/validate-user/', {
+  const res = await http('/api/validate-user/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email: params.email, dni: params.dni }),
-    credentials: 'include',
   })
   const data = await res.json().catch(() => ({}))
   if (!res.ok || !data?.ok) {
@@ -52,13 +48,11 @@ export async function validateUserTraditional(params: { email: string; dni: stri
     err.status = res.status
     throw err
   }
-  
-  // --- SE ACTUALIZÓ EL TIPO DE RETORNO AQUÍ ---
   return data as AuthResponse
 }
 
 export async function loginFacial(params: { email: string; facialFrame: string; position: PositionData }) {
-  const res = await fetch('/api/login/', {
+  const res = await http('/api/login/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -66,33 +60,27 @@ export async function loginFacial(params: { email: string; facialFrame: string; 
       facial_frame: params.facialFrame,
       position_data: params.position,
     }),
-    credentials: 'include',
   })
   const data = await res.json().catch(() => ({}))
   if (!res.ok || !data?.ok) {
     throw new Error(data?.error || `Login failed (${res.status})`)
   }
-  
-  // --- SE ACTUALIZÓ EL TIPO DE RETORNO AQUÍ ---
   return data as AuthResponse
 }
 
-// Registration must POST a form to the Django view at /register/ which requires CSRF.
-// Strategy: first perform a GET to /register/ to receive the csrftoken cookie, then submit the form.
 export type RegisterPayload = {
   nombres: string
   apellidos: string
   email: string
   dni: string
-  // Either single capture (compat) or preferred multi-samples JSON
   facial_frame?: string
   position_data?: PositionData
   samples?: { frames: string[]; positions: PositionData[] }
 }
 
 export async function registerUser(payload: RegisterPayload) {
-  // Step 1: fetch the page to set csrftoken cookie
-  await fetch('/register/', { method: 'GET', credentials: 'include' })
+  // GET para recibir el csrftoken cookie
+  await http('/register/', { method: 'GET' })
   const csrftoken = getCookie('csrftoken')
 
   const form = new FormData()
@@ -107,74 +95,54 @@ export async function registerUser(payload: RegisterPayload) {
     form.append('position_data', JSON.stringify(payload.position_data))
   }
 
-  const res = await fetch('/register/', {
+  const res = await http('/register/', {
     method: 'POST',
     body: form,
-    credentials: 'include',
     headers: csrftoken ? { 'X-CSRFToken': csrftoken } : undefined,
   })
 
-  // Django redirects to /login on success; any non-redirect HTML means failure
   if (res.redirected || res.url.endsWith('/login/')) {
     return { ok: true }
   }
   const text = await res.text().catch(() => '')
-  // Heuristic: when embeddings fail, the view renders register.html with error messages.
-  // We treat any non-redirect 200 as failure so the UI can inform the user correctly.
   const msg = 'No se pudo registrar tu rostro. Verifica iluminación, encuadre y vuelve a intentar.'
-  if (!res.ok) {
-    throw new Error(text || `${msg} (HTTP ${res.status})`)
-  }
+  if (!res.ok) throw new Error(text || `${msg} (HTTP ${res.status})`)
   throw new Error(msg)
 }
 
-// Voice registration function
 export async function registerVoice(audioBlob: Blob) {
-  try {
-    // Get CSRF token
-    const csrftoken = getCookie('csrftoken')
-    
-    // First, get or create a pending registration token from backend
-    const pendingTokenRes = await fetch('/voz/api/get_pending_token/', {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(csrftoken ? { 'X-CSRFToken': csrftoken } : {})
-      },
-    })
+  const csrftoken = getCookie('csrftoken')
 
-    if (!pendingTokenRes.ok) {
-      throw new Error('No se pudo obtener el token de registro')
-    }
+  const pendingTokenRes = await http('/voz/api/get_pending_token/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(csrftoken ? { 'X-CSRFToken': csrftoken } : {}),
+    },
+  })
 
-    const tokenData = await pendingTokenRes.json()
-    if (!tokenData.success || !tokenData.pending_token) {
-      throw new Error('No se pudo generar el token de registro')
-    }
+  if (!pendingTokenRes.ok) throw new Error('No se pudo obtener el token de registro')
 
-    // Create FormData with audio
-    const formData = new FormData()
-    formData.append('audio', audioBlob, 'voice_sample.webm')
-    formData.append('pending_token', tokenData.pending_token)
-
-    const res = await fetch('/voz/api/register_audio/', {
-      method: 'POST',
-      body: formData,
-      credentials: 'include',
-      headers: csrftoken ? { 'X-CSRFToken': csrftoken } : undefined,
-    })
-
-    const data = await res.json().catch(() => ({}))
-    if (!res.ok || !data?.success) {
-      throw new Error(data?.error || `No se pudo guardar el audio (${res.status})`)
-    }
-    
-    return data as { success: true; message?: string }
-  } catch (error) {
-    console.error('Error registering voice:', error)
-    throw error
+  const tokenData = await pendingTokenRes.json()
+  if (!tokenData.success || !tokenData.pending_token) {
+    throw new Error('No se pudo generar el token de registro')
   }
+
+  const formData = new FormData()
+  formData.append('audio', audioBlob, 'voice_sample.webm')
+  formData.append('pending_token', tokenData.pending_token)
+
+  const res = await http('/voz/api/register_audio/', {
+    method: 'POST',
+    body: formData,
+    headers: csrftoken ? { 'X-CSRFToken': csrftoken } : undefined,
+  })
+
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok || !data?.success) {
+    throw new Error(data?.error || `No se pudo guardar el audio (${res.status})`)
+  }
+  return data as { success: true; message?: string }
 }
 
 function getCookie(name: string): string | undefined {

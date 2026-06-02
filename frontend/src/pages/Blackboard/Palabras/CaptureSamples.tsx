@@ -1,9 +1,9 @@
 import Layout from '../../../components/Blackboard/Layout'
 import { useTheme } from '../../../App'
-// Usamos el mismo panel de cámara para igualar dimensiones/estilos
 import CameraPanel from '../../../components/Blackboard/Arithmetic/CameraPanel'
 import { usePalabras } from './hooks/usePalabras'
 import { useEffect, useState } from 'react'
+import { http } from '../../../config/httpClient'
 
 export default function CaptureSamplesPalabras() {
   const { isDarkMode } = useTheme()
@@ -60,7 +60,7 @@ export default function CaptureSamplesPalabras() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('/palabras/gestos_entrenados/')
+        const res = await http('/palabras/gestos_entrenados/')
         if (res.ok) {
           const data = await res.json()
           const count = Array.isArray(data?.gestos) ? data.gestos.length : (Array.isArray(data) ? data.length : 0)

@@ -3,6 +3,7 @@ import Layout from '../../../components/Blackboard/Layout'
 import { useTheme } from '../../../App'
 import { useArithmetic } from './hooks/useArithmetic'
 import CameraPanel from '../../../components/Blackboard/Arithmetic/CameraPanel'
+import { http } from '../../../config/httpClient'
 
 type Category = 'vocales' | 'abecedario' | 'numeros' | 'operaciones' | 'palabras'
 
@@ -59,7 +60,7 @@ export default function CaptureSamples() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('/operaciones/gestos_entrenados')
+        const res = await http('/operaciones/gestos_entrenados')
         if (!res.ok) throw new Error('No se pudo obtener registros')
         const data = await res.json()
         const count = Array.isArray(data?.gestos) ? data.gestos.length : (Array.isArray(data) ? data.length : 0)

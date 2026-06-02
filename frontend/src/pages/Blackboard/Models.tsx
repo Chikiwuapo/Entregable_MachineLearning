@@ -5,6 +5,7 @@ import type { ModelType, TrainingSession, ModelStats } from '../../types'
 import { useUserStore } from '../../auth/userStore'
 import { useTheme } from '../../App'
 import { useModelContext } from '../../contexts/ModelContext'
+import { http } from '../../config/httpClient'
 
 export default function Models() {
   const navigate = useNavigate()
@@ -63,7 +64,7 @@ export default function Models() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('/operaciones/gestos_entrenados')
+        const res = await http('/operaciones/gestos_entrenados')
         if (!res.ok) throw new Error('No se pudo obtener registros')
         const data = await res.json()
         const count = Array.isArray(data?.gestos) ? data.gestos.length : (Array.isArray(data) ? data.length : 0)
