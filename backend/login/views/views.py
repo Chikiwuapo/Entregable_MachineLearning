@@ -146,8 +146,8 @@ def register_view(request):
     })
 
 
-@require_POST
 @csrf_exempt
+@require_POST
 def api_encode(request):
     """Devuelve embedding facial a partir de un frame base64."""
     log = logging.getLogger('facial')
@@ -250,8 +250,8 @@ def api_login(request):
         return JsonResponse({'ok': False, 'error': 'Error interno'}, status=500)
 
 
-@require_POST
 @csrf_exempt
+@require_POST
 def api_register_basic(request):
     """Crea o actualiza un usuario solo con datos básicos (sin rostro).
     Esperan JSON o x-www-form-urlencoded con campos: nombres, apellidos, email, dni.
@@ -379,8 +379,8 @@ def db_check(request):
         return JsonResponse({"ok": False, "error": str(e)}, status=500)
 
 
-@require_POST
 @csrf_exempt
+@require_POST
 def api_validate_user(request):
     """Valida credenciales tradicionales: email + DNI.
     Responde JSON con ok True si existe el usuario y coincide el DNI.
@@ -444,8 +444,8 @@ def api_validate_user(request):
         return JsonResponse({'ok': False, 'error': 'Error interno'}, status=500)
 
 
-@require_POST
 @csrf_exempt
+@require_POST
 def api_debug_decode(request):
     """Endpoint temporal de diagnóstico: evalúa un frame base64 y reporta métricas.
     No altera lógica de negocio.
