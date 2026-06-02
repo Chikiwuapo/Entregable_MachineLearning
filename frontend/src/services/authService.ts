@@ -11,6 +11,19 @@ export type PositionData = {
   dist?: number
 }
 
+// Tipo de respuesta común para los endpoints de autenticación exitosa
+export type AuthResponse = {
+  ok: true
+  redirect?: string
+  user?: {
+    id: number
+    name: string
+    email: string
+    nombres: string
+    apellidos: string
+  }
+}
+
 export async function registerBasic(payload: { nombres: string; apellidos: string; email: string; dni: string }) {
   const res = await fetch('/api/register-basic/', {
     method: 'POST',
@@ -39,7 +52,9 @@ export async function validateUserTraditional(params: { email: string; dni: stri
     err.status = res.status
     throw err
   }
-  return data as { ok: true }
+  
+  // --- SE ACTUALIZÓ EL TIPO DE RETORNO AQUÍ ---
+  return data as AuthResponse
 }
 
 export async function loginFacial(params: { email: string; facialFrame: string; position: PositionData }) {
@@ -57,7 +72,9 @@ export async function loginFacial(params: { email: string; facialFrame: string; 
   if (!res.ok || !data?.ok) {
     throw new Error(data?.error || `Login failed (${res.status})`)
   }
-  return data as { ok: true; redirect?: string }
+  
+  // --- SE ACTUALIZÓ EL TIPO DE RETORNO AQUÍ ---
+  return data as AuthResponse
 }
 
 // Registration must POST a form to the Django view at /register/ which requires CSRF.

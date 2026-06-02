@@ -52,21 +52,28 @@ export default function TrainModelAbecedario() {
     return () => window.removeEventListener('app:dataChanged', onData as EventListener)
   }, [])
 
-  return (
+ return (
     <Layout>
-      <div className="container-page py-6">
-        <div className="mb-4">
-          <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-header'}`}>Entrenar Modelo</h1>
-          <p className={`${isDarkMode ? 'text-gray-300' : 'text-slate-600'} mt-1`}>Selecciona un modelo, configura los parámetros y entrena visualizando las métricas.</p>
+      {/* 1. Viewport Locking: El contenedor principal ocupa exactamente el alto disponible sin desborde global */}
+      <div className="w-full h-[calc(100vh-70px)] overflow-hidden p-6 flex flex-col">
+        
+        {/* 2. Protection of static elements: Cabecera estática con shrink-0 */}
+        <div className="shrink-0 mb-4">
+          <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-header'}`}>
+            Entrenar Modelo
+          </h1>
+          <p className={`${isDarkMode ? 'text-gray-300' : 'text-slate-600'} mt-1 text-sm`}>
+            Selecciona un modelo, configura los parámetros y entrena visualizando las métricas.
+          </p>
         </div>
 
-        {/* Tarjeta superior de Abecedario (solo esta) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {/* 2. Protection of static elements: Tarjeta superior de Abecedario fija mediante shrink-0 */}
+        <div className="shrink-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div className={`rounded-2xl p-4 shadow border ${isDarkMode ? 'bg-gradient-to-br from-blue-900 to-indigo-900 border-blue-800' : 'bg-gradient-to-br from-blue-500 to-indigo-500 border-blue-400'} text-white`}
                style={{ boxShadow: isDarkMode ? '0 10px 25px -5px rgba(59, 130, 246, 0.2)' : '0 10px 25px -5px rgba(59, 130, 246, 0.35)' }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm opacity-90">Abecedario</div>
+                <div className="text-sm font-semibold opacity-90">Abecedario</div>
                 <div className="text-xs opacity-85">A - Z</div>
               </div>
               <div className="text-sm opacity-85">Registros</div>
@@ -74,9 +81,11 @@ export default function TrainModelAbecedario() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-          {/* Parámetros */}
-          <div className={`rounded-2xl p-4 shadow ${isDarkMode ? 'bg-gray-900 border border-gray-800' : 'bg-white border border-slate-200'}`}>
+        {/* Contenedor flexible para las columnas (min-h-0 le permite calcular el alto máximo a los hijos) */}
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0 items-start">
+          
+          {/* 3. Independencia de la columna de parámetros: shrink-0 evita deformaciones y flota a la izquierda */}
+          <div className={`shrink-0 lg:col-span-1 rounded-2xl p-4 shadow ${isDarkMode ? 'bg-gray-900 border border-gray-800' : 'bg-white border border-slate-200'}`}>
             <div className="text-sm font-semibold">Parámetros</div>
             <div className="mt-3 space-y-3 text-sm">
               <div>
@@ -91,7 +100,7 @@ export default function TrainModelAbecedario() {
                 <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-slate-500'}`}>Learning rate</label>
                 <input type="number" step={0.0001} min={0.0001} max={0.1} value={learningRate} onChange={(e)=>setLearningRate(parseFloat(e.target.value||'0.001'))} className={`w-full px-3 py-2 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-100' : 'bg-white border-slate-300 text-slate-800'}`} />
               </div>
-              <button onClick={onTrain} className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow">Entrenar</button>
+              <button onClick={onTrain} className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow transition-colors duration-200">Entrenar</button>
             </div>
 
             {regData.length > 0 && (
@@ -109,11 +118,12 @@ export default function TrainModelAbecedario() {
             )}
           </div>
 
-          {/* Columna derecha: distribución + regresión */}
-          <div className="lg:col-span-2 flex flex-col gap-6">
+          {/* 4 y 5. Activación de Scroll Autónomo en la columna de gráficos y ocultación estética de la barra física */}
+          <div className="lg:col-span-2 h-full max-h-full overflow-y-auto flex flex-col gap-6 pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <DataDistributionCard data={distData} isDarkMode={isDarkMode} />
             <RegressionChart data={regData} isDarkMode={isDarkMode} />
           </div>
+
         </div>
       </div>
 
