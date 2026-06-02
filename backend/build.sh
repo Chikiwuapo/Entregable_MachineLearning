@@ -4,10 +4,10 @@ set -o errexit
 
 echo "🚀 Starting build process..."
 
-# Install dependencies
+# Upgrade pip e instalar con --prefer-binary para evitar compilaciones desde fuente
 echo "📦 Installing Python dependencies..."
 pip install --upgrade pip
-pip install -r requirements.txt
+pip install --prefer-binary -r requirements.txt
 
 # Collect static files
 echo "📁 Collecting static files..."
